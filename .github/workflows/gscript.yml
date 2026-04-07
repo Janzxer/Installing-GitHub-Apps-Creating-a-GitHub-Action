@@ -1,0 +1,48 @@
+name: Lab 3 Automation
+on:
+  issues:
+    types: [closed]
+  pull_request:
+    types: [opened]
+
+jobs:
+  automation_tasks:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull_requests: write
+    steps:
+      - name: Handle Automation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // TASK 1: Comment when issue is closed
+            if (context.eventName === 'issues' && context.payload.action === 'closed') {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner,
+                repo,
+                body: 'The issue is now resolved.'
+              });
+            }
+
+            //TASK 2: First pull remark
+            if (context.eventName === 'pull_request' && context.payload.action === 'opened') {
+              const creator = context.payload.pull_request.user.login;
+              const prNumber = context.payload.pull_request.number;
+
+              const response = await github.rest.search.issuesAndPullRequests({
+                q: `is:pr repo:${owner}/${repo} author:${creator}`
+              });
+
+              if (response.data.total_count === 1) {
+                await github.rest.issues.createComment({
+                  issue_number: prNumber,
+                  owner,
+                  repo,
+                  body: 'Congratulations for opening your first pull request!'
+                });
+              }
+            }
