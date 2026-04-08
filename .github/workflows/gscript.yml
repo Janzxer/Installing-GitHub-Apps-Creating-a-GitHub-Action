@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      pull_requests: write
+      pull-requests: write
     steps:
       - name: Handle Automation
         uses: actions/github-script@v7
